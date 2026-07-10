@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: api
+
+aws:
+  endpoint-url: http://127.0.0.1:4566
+  region: us-east-1
+  access-key-id: test
+  secret-access-key: test
