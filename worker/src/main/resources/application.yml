@@ -1,3 +1,15 @@
 spring:
   application:
     name: worker
+
+aws:
+  endpoint-url: http://127.0.0.1:4566
+  region: us-east-1
+  access-key-id: test
+  secret-access-key: test
+
+app:
+  s3:
+    bucket-name: image-pipeline-s3-5dafe7b0
+  sqs:
+    queue-url: http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/image-pipeline-sqs
