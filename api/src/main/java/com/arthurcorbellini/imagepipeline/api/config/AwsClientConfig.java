@@ -1,7 +1,6 @@
 package com.arthurcorbellini.imagepipeline.api.config;
 
 import java.net.URI;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -11,7 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
-@EnableConfigurationProperties(AwsProperties.class)
 public class AwsClientConfig {
 
   @Bean
