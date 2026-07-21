@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-cd "$(dirname "$0")/../modules"
+cd "$(dirname "$0")/../worker"
 
-./mvnw install -N
-./mvnw install -pl common
-./mvnw -pl worker spring-boot:run
+./mvnw spring-boot:run

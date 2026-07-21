@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-cd "$(dirname "$0")/../modules"
+cd "$(dirname "$0")/../api"
 
-./mvnw install -N
-./mvnw install -pl common
-./mvnw -pl api spring-boot:run
+./mvnw spring-boot:run
