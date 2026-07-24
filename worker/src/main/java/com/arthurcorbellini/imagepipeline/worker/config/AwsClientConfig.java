@@ -18,6 +18,7 @@ public class AwsClientConfig {
         .endpointOverride(URI.create(props.endpointUrl()))
         .region(Region.of(props.region()))
         .credentialsProvider(credentials(props))
+        .forcePathStyle(true)
         .build();
   }
 

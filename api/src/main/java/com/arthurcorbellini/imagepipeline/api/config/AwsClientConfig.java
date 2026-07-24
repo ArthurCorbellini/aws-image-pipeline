@@ -7,6 +7,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
@@ -19,15 +20,17 @@ public class AwsClientConfig {
         .endpointOverride(URI.create(props.endpointUrl()))
         .region(Region.of(props.region()))
         .credentialsProvider(credentials(props))
+        .forcePathStyle(true)
         .build();
   }
 
   @Bean
   public S3Presigner s3Presigner(AwsProperties props) {
     return S3Presigner.builder()
-        .endpointOverride(URI.create(props.endpointUrl()))
+        .endpointOverride(URI.create(props.presignedEndpointUrl()))
         .region(Region.of(props.region()))
         .credentialsProvider(credentials(props))
+        .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
         .build();
   }
 
