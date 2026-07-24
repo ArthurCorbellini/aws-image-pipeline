@@ -1,0 +1,8 @@
+aws:
+  endpoint-url: ""
+  access-key-id: ""
+  secret-access-key: ""
+
+# app.s3.bucket-name e app.sqs.queue-url NÃO ficam aqui de propósito —
+# o queue-url carrega o account ID da AWS na URL, e não deveria ir pro repositório público.
+# Passe via variável de ambiente na hora de rodar: APP_S3_BUCKET_NAME, APP_SQS_QUEUE_URL
