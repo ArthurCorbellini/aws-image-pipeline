@@ -31,3 +31,11 @@ build/
 
 ### Others ###
 .localdev/
+
+### Terraform ###
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+# .terraform.lock.hcl is intentionally NOT ignored — it should be committed
