@@ -61,7 +61,7 @@ scripts/               dev-api.sh / dev-worker.sh — run each app locally
 
 ## Running locally (LocalStack)
 
-Requires Java 21 and a Docker-compatible container runtime (Docker or Podman).
+Requires Java 21, a Docker-compatible container runtime (Docker or Podman), and the AWS CLI (with some credentials configured — LocalStack accepts any value, but the CLI itself still needs a profile to exist).
 
 1. Start LocalStack:
    ```bash
@@ -112,9 +112,16 @@ terraform apply
 
 The least-privilege IAM policy attached to the ECS task role grants exactly `s3:PutObject`/`GetObject` on the app's bucket and `sqs:SendMessage`/`ReceiveMessage`/`DeleteMessage` on the app's queue — nothing broader.
 
+⚠️ On a first apply against empty infrastructure, don't run a plain `terraform apply` here — the ECS services need images already in ECR to start, and ECR needs to exist before you can push to it. See [Deploying to ECS](#deploying-to-ecs) below for the order that actually works.
+
 ## Deploying to ECS
 
-1. Build and push both images to their ECR repositories (created by Terraform):
+1. On a first-time deploy, the ECR repositories don't exist yet — create just those two, without touching anything else:
+   ```bash
+   terraform apply -target=aws_ecr_repository.api -target=aws_ecr_repository.worker
+   ```
+
+2. Build and push both images to those ECR repositories:
    ```bash
    aws ecr get-login-password --region <region> | podman login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com
 
@@ -125,13 +132,15 @@ The least-privilege IAM policy attached to the ECS task role grants exactly `s3:
    podman push <account-id>.dkr.ecr.<region>.amazonaws.com/image-pipeline-worker:latest
    ```
 
-2. Apply the rest of the infrastructure (`terraform apply`) so the ECS services can start with images already in place.
+3. Apply the rest of the infrastructure (`terraform apply`) so the ECS services can start with images already in place.
 
-3. After pushing a new image to an existing service, force a fresh deployment (ECS won't automatically notice a new `:latest`):
+4. After pushing a new image to an existing service, force a fresh deployment (ECS won't automatically notice a new `:latest`):
    ```bash
    aws ecs update-service --cluster image-pipeline-cluster --service image-pipeline-api --force-new-deployment
    aws ecs update-service --cluster image-pipeline-cluster --service image-pipeline-worker --force-new-deployment
    ```
+
+Rebuilding this whole environment from nothing (new machine, empty AWS account, no Terraform state)? See [docs/bootstrap.md](docs/bootstrap.md) for the full from-scratch runbook.
 
 ## Out of scope
 
