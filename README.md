@@ -8,15 +8,27 @@ This is a portfolio/learning project — deliberately scoped small. See [Out of 
 
 ## Architecture
 
-```
-Client → API (Spring Boot) → S3 (original, originals/<id>.<ext>)
-                            → SQS (message: { imageId, s3Key })
+```mermaid
+flowchart LR
+    Client(["Client"])
+    API["API (Spring Boot)"]
+    Worker["Worker (Spring Boot, polling consumer)"]
+    S3[("S3 bucket")]
+    SQS[/"SQS queue"/]
 
-Worker (Spring Boot, polling consumer) → SQS (consumes message)
-                                        → S3 (downloads original)
-                                        → resizes with Thumbnailator
-                                        → S3 (uploads result, processed/<id>.<ext>)
-                                        → S3 (writes metadata/<id>.json)
+    Client -- "1. POST /images" --> API
+    API -- "2. upload original\noriginals/&lt;id&gt;.&lt;ext&gt;" --> S3
+    API -- "3. publish { imageId, s3Key }" --> SQS
+    API -- "4. 201 { imageId }" --> Client
+
+    SQS -- "5. consume message" --> Worker
+    S3 -- "6. download original" --> Worker
+    Worker -- "7. upload result (resized)\nprocessed/&lt;id&gt;.&lt;ext&gt;" --> S3
+    Worker -- "8. write status\nmetadata/&lt;id&gt;.json" --> S3
+
+    Client -- "9. GET /images/{id}" --> API
+    S3 -- "10. read metadata" --> API
+    API -- "11. { status, presigned url }" --> Client
 ```
 
 API and Worker are two independent Spring Boot applications (no shared module, no shared deploy) — they only agree on the shape of the SQS message and the S3 key layout.
