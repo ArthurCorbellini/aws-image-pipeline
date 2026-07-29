@@ -64,3 +64,7 @@ Files are split by AWS service (`s3.tf`, `sqs.tf`, `iam.tf`, `network.tf`, `ecr.
 ### Known upstream provider quirk
 
 `aws_sqs_queue.max_message_size` has `lifecycle { ignore_changes = [max_message_size] }` in `sqs.tf` — the AWS provider's client-side validation still caps at the old 262144-byte limit even though AWS's real API allows up to 1048576. Don't try to set this attribute explicitly; it'll be rejected by the provider before it ever reaches AWS ([hashicorp/terraform-provider-aws#43692](https://github.com/hashicorp/terraform-provider-aws/issues/43692)).
+
+### desired_count is deliberately unmanaged
+
+Both `aws_ecs_service` resources in `ecs.tf` also have `lifecycle { ignore_changes = [desired_count] }`. Fargate bills per running task with no free tier, so `desired_count` is toggled directly via `aws ecs update-service --desired-count 0|1` to stop/start billing between sessions — not through Terraform. Don't remove this `ignore_changes` or "fix" the count back to a fixed value; that would make routine cost-saving scale-downs get silently reverted on the next `apply`.

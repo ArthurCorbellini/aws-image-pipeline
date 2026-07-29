@@ -142,6 +142,17 @@ The least-privilege IAM policy attached to the ECS task role grants exactly `s3:
 
 Rebuilding this whole environment from nothing (new machine, empty AWS account, no Terraform state)? See [docs/bootstrap.md](docs/bootstrap.md) for the full from-scratch runbook.
 
+## Cost management
+
+Unlike S3/SQS (pay-per-use, effectively free at this scale), **Fargate bills per running task, whether or not anything is actually using it** — there's no free tier. Scale both services down to zero between test sessions instead of leaving them running:
+
+```bash
+aws ecs update-service --cluster image-pipeline-cluster --service image-pipeline-api --desired-count 0
+aws ecs update-service --cluster image-pipeline-cluster --service image-pipeline-worker --desired-count 0
+```
+
+and back up to `1` when you actually want to hit the API again. This doesn't touch the cluster, task definitions, or any other resource — just stops billing for idle compute. `desired_count` in `ecs.tf` is intentionally excluded from drift detection (`lifecycle.ignore_changes`) so toggling it this way doesn't get silently reverted by the next `terraform apply`.
+
 ## Out of scope
 
 Kept deliberately out, to stay focused on the AWS/Terraform learning goal:
