@@ -92,6 +92,13 @@ resource "aws_ecs_service" "api" {
     security_groups  = [aws_security_group.api.id]
     assign_public_ip = true
   }
+
+  # desired_count is toggled manually (`aws ecs update-service --desired-count`)
+  # to scale down to 0 between test sessions and avoid paying for idle Fargate tasks.
+  # Ignore drift here instead of letting `apply` silently scale it back up.
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
 }
 
 resource "aws_ecs_service" "worker" {
@@ -105,5 +112,9 @@ resource "aws_ecs_service" "worker" {
     subnets          = data.aws_subnets.default.ids
     security_groups  = [aws_security_group.worker.id]
     assign_public_ip = true
+  }
+
+  lifecycle {
+    ignore_changes = [desired_count]
   }
 }
