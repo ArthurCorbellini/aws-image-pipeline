@@ -153,13 +153,20 @@ aws ecs update-service --cluster image-pipeline-cluster --service image-pipeline
 
 and back up to `1` when you actually want to hit the API again. This doesn't touch the cluster, task definitions, or any other resource — just stops billing for idle compute. `desired_count` in `ecs.tf` is intentionally excluded from drift detection (`lifecycle.ignore_changes`) so toggling it this way doesn't get silently reverted by the next `terraform apply`.
 
+## Possible next steps
+
+Natural next steps if this project keeps growing, not currently planned:
+
+- **Dead-letter queue (SQS)** — messages that fail repeatedly today just get redelivered forever instead of being set aside.
+- **Load balancer + HTTPS** — the API is reachable directly on its task's public IP, over plain HTTP; an ALB + certificate would fix that and remove the dependency on an IP that changes on every deploy.
+- **Auto scaling** — `desired_count` is fixed today (toggled manually for cost control); scaling the Worker based on SQS queue depth would be the next level.
+- **Alarms/monitoring** — only CloudWatch logs exist today, no alarms (e.g. a task going down, the queue backing up).
+
 ## Out of scope
 
 Kept deliberately out, to stay focused on the AWS/Terraform learning goal:
 
-- Dead-letter queue / retry policy tuning
 - User authentication
 - Multiple processing filters (only resize/thumbnail)
 - Frontend/UI
 - CI/CD pipeline
-- Load balancer / HTTPS in front of the API (it's reachable directly on its task's public IP, over plain HTTP)
